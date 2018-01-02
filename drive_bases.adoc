@@ -1,0 +1,95 @@
+= Drive Bases
+:toc: macro
+:sectanchors:
+:source-highlighter: pygments
+:pygments-style: colorful
+
+toc::[]
+
+== Summary
+
+This replaces the RobotDrive class with a class for each drive base. Less useful
+overloads were also removed. DifferentialDrive, MecanumDrive, and KilloughDrive
+are provided.
+
+== Motivation
+
+The RobotDrive class has several problems. It has two constructor overloads each
+for the number of motors per side and two variations of those overloads for raw
+motor channels and SpeedController objects. C++ is even worse with
+`SpeedController` pointers, `SpeedController` references, and
+`std::shared_ptr<SpeedController>`s.
+
+There are also at least four overloads for the `TankDrive()` and `ArcadeDrive()`
+functions for various combinations of `GenericHID` pointers and references in
+addition to the raw value overloads.
+
+== Design
+
+This drive base rewrite makes the interface more manageable by providing a
+separate class for each drive base type and only one constructor overload
+(usually a `SpeedController` per side). `DifferentialDrive`, `MecanumDrive`, and
+`KilloughDrive` are provided.
+
+=== Coordinate frame convention
+
+NED axis convention is much more common in 2D and 3D robot kinematics. Also,
+the `Joystick` class already uses the NED convention. For reference:
+http://www.nuclearprojects.com/ins/images/axis_big.png.
+
+In the NED convention, the positive X axis is forward, positive Y is right, and
+positive Z is down to satisfy the right-hand rule. `Joystick`'s `GetX()`,
+`GetY()`, and `GetZ()` member functions return the measurement of rotation
+around their respective axes, not translation. For example, when the joystick is
+pushed forward, there is a negative rotation around the pitch (Y) axis.
+Therefore, a negative Y value is returned.
+
+Library users generally map the joystick Y rotation measurement to the robot's X
+translation for the inverse kinematics via `-GetY()`. Continuing this logic,
+joystick X rotation maps to robot Y translation or robot Z rotation. Together,
+this gives `drive.Drive(-joy.GetY(), joy.GetX());` where the first argument is X
+translation and the second is Y translation or Z rotation.
+
+=== Differential Drive
+
+==== Arcade drive derivations
+
+
+
+==== Tank drive derivations
+
+
+
+=== Mecanum Drive
+
+==== Cartesian derivations
+
+
+
+==== Polar derivations
+
+
+
+=== Killough Drive
+
+==== Cartesian derivations
+
+
+==== Polar derivations
+
+
+
+== Drawbacks
+
+Why should we _not_ do this?
+
+Backwards compatibility with the old inverse kinematics?
+
+== Alternatives
+
+What other designs have been considered? What is the impact of not
+doing this?
+
+== Unresolved Questions
+
+None.
